@@ -125,9 +125,9 @@ class GlobalredirectSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $path_info = ltrim($event->getRequest()->getPathInfo(), '/');
-    if (substr($path_info, -1, 1) === '/') {
-      $path_info = trim($path_info, '/');
+    $path_info = $event->getRequest()->getPathInfo();
+    if (substr($path_info, -1, 1) === '/' && $path_info !== '/') {
+      $path_info = rtrim($path_info, '/');
       try {
         $path_info = $this->aliasManager->getPathByAlias($path_info);
         // Need to add the slash back.
@@ -149,7 +149,7 @@ class GlobalredirectSubscriber implements EventSubscriberInterface {
     }
 
     $request = $event->getRequest();
-    $path = trim($request->getPathInfo(), '/');
+    $path = rtrim($request->getPathInfo(), '/');
 
     // Redirect only if the current path is not the root and this is the front
     // page.
@@ -164,7 +164,7 @@ class GlobalredirectSubscriber implements EventSubscriberInterface {
    * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
    */
   public function globalredirectNormalizeAliases(GetResponseEvent $event) {
-    if ($event->getRequestType() != HttpKernelInterface::MASTER_REQUEST || !$this->config->get('normalize_aliases') || !$path = trim($event->getRequest()
+    if ($event->getRequestType() != HttpKernelInterface::MASTER_REQUEST || !$this->config->get('normalize_aliases') || !$path = rtrim($event->getRequest()
         ->getPathInfo(), '/')
     ) {
       return;
